@@ -1,0 +1,27 @@
+.form__container {
+  display: flex;
+  justify-content: center;
+
+  .form__element {
+    margin: 20px 0;
+    border: 1px solid #c9c9c9;
+    padding: 4px;
+    display: inherit;
+    border-radius: 5px;
+
+    input {
+      width: 300px;
+      border-style: none;
+      padding: 0 5px;
+
+      &:focus{
+        outline: none;
+      }
+    }
+
+    button {
+      border-style: none;
+      cursor: pointer;
+    }
+  }
+}
