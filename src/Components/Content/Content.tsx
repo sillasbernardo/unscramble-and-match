@@ -16,121 +16,91 @@ type StateType = {
 const Content = () => {
   const searchContent = useSelector((state: StateType) => state.searchContent);
 
-  const [possibleMatch, setPossibleMatch] = useState("");
+  const [possibleMatches, setPossibleMatches] = useState<string[]>([]);
+  const [wordsHasLetters, setWordsHasLetters] = useState<string[]>([]);
+  const [isMatching, setIsMatching] = useState(false);
 
   const reduxDispatch = useDispatch();
 
   useEffect(() => {
     if (searchContent.isSearching) {
+      setPossibleMatches([]);
+      setIsMatching(true);
+
       fetch("/words.txt")
         .then((response) => response.text())
         .then((data) => {
           const wordsArray = data.split(/\r?\n/); // Split into array of words
 
-          const scrambledLetters = [...searchContent.searchValue]; // Array of typed letters
+          const scrambledLetters = [...searchContent.searchValue]; // Copy and parse string of letters into array
 
-          // Find words that has these letters to reduce dictionary size
-          const matchedWords = wordsArray.filter(word => {
-            let counter = 0;
-
-            scrambledLetters.forEach(letter => {
-              if (word.includes(letter)){
-                counter++;
-              }
-            })
-
-            if (counter === scrambledLetters.length){
-              return word;
-            }
-          })
-
-          // Take the word and the input letters, check if each word letter is equal to any of the input letters
-          const foundWord = matchedWords.filter(word => {
-            let scrambledLettersCopy = scrambledLetters.slice(); // copy of original typed letters
-
-            let matchedWordArray: string[] = [];
-
-            [...word].forEach(dicWordLetter => { // f loat
-              let checkLetter = true; // stop scrambledLettersCopy's for each
-              let checkedLetters: string[] = []; // store checked letters
-
-              scrambledLettersCopy.forEach(inputLetter => { // f o o t
-                if (inputLetter === dicWordLetter && checkLetter){
-                  checkedLetters.forEach(e => {
-                    if (e !== dicWordLetter){
-                      matchedWordArray.push(dicWordLetter);
-                      checkLetter = false;
-                      checkedLetters.push(inputLetter);
-                    }
-                  })
-                }
-              })
-            })
-
-            const matchedWords = matchedWordArray.reduce((prev, current) => prev + current);
-
-            console.log(matchedWords)
-            return word === matchedWords;
-          })
-
-
-          // If yes, save this letter somewhere, remove it from the input letters and test next word letter
-
-          // Take the letters saved somewhere, merge them and show to user
-
-          /* // Match all words that contain all the informed letters
+          /* This codeblock gets all the words that cantains the letters */
           const matchedWords = wordsArray.filter((word) => {
-            let wordFound = false;
-
             let counter = 0;
-            scrambledLetters.forEach((letter) => {
-              if (!word.includes(letter)) {
-                wordFound = false;
-                return;
-              }
 
-              counter++;
-              if (counter === scrambledLetters.length) {
-                wordFound = true;
+            scrambledLetters.forEach((letter) => {
+              if (word.includes(letter)) {
+                counter++;
               }
             });
 
-            if (wordFound) {
-              return word; // return every word that contains at least the informed letters
+            if (counter === scrambledLetters.length) {
+              return word;
             }
           });
+          setWordsHasLetters(matchedWords);
+          /* End of codeblock */
 
-          // Match the exact word that only has the informed letters
-          let foundWord: string[] = []; // Array of found word letters
-          matchedWords.forEach((word) => {
-            const wordArray = [...word]; // Array of word letters
-            let scrambledLettersCopy = scrambledLetters.slice(); // Copy of typed letters
+          /* This codeblock gets the exact word(s) that can be built with the letters */
+          // Remove words that are longer than scrambledLetters length
+          const sameLengthMatchedWords = matchedWords.filter(
+            (word) => word.length === scrambledLetters.length
+          );
 
-            if (foundWord.length !== scrambledLettersCopy.length) { // foundWord wasn't found yet
-              wordArray.forEach((wordLetter) => {
-                for (let i = 0; i < scrambledLettersCopy.length; i++) {
-                  if (wordLetter === scrambledLettersCopy[i] && word.length === scrambledLetters.length) {
-                    console.log(wordLetter, scrambledLettersCopy[i])
-                    console.log(word)
-                    console.log(word.length, scrambledLetters.length)
-                    scrambledLettersCopy = scrambledLettersCopy.filter((letter) => letter !== scrambledLettersCopy[i]); // remove letter from typed so it's not matched again (this ensures double letters are evaluated)
-                    foundWord.push(wordLetter);
-                    break;
-                  }
+          // Compare each letter in dic words to the informed letters - goal: find matched letters
+          let foundLetters: string[] = []; // fo
 
-                  if (!foundWord.length){ // set foundWord to empty array if some letters matched but wasn't the word
-                    foundWord = [];
-                  }
+          sameLengthMatchedWords.forEach((dicWord) => {
+            // foot
+            let scrambledLettersCopy = scrambledLetters.slice(); // too // Copy the original scrambledLetters so for each word loop, the original is restored for reevaluation
+
+            // Take each letter in dicWord and compare to scrambledLetters
+            [...dicWord].forEach((dicWordLetter) => {
+              // o
+              for (let i = 0; i < scrambledLettersCopy.length; i++) {
+                if (dicWordLetter === scrambledLettersCopy[i]) {
+                  // o === o
+                  // If one of the letters in dicWord matches, take the letter and push to foundLetters.
+                  foundLetters.push(dicWordLetter);
+                  // Remove the matched letter from scrambledLettersCopy based on its index
+                  scrambledLettersCopy.splice(i, 1);
+                  break;
                 }
+              }
+            });
 
+            // Check if foundLetters is complete. Incomplete means that only part of the words matched.
+            if (foundLetters.length === scrambledLetters.length) {
+              const foundWord = foundLetters.reduce(
+                (prevLetter, currentLetter) => prevLetter + currentLetter
+              ); // Merge found letters
+
+              // Compare this merged letters (word) to each matchedWord
+              matchedWords.forEach((word) => {
+                if (foundWord === word) {
+                  setPossibleMatches((prevValue) => [...prevValue, foundWord]);
+                  foundLetters = []; // Reset foundLetters to be reused
+                }
               });
+            } else {
+              foundLetters = [];
             }
-          }); */
+          });
         });
 
       reduxDispatch(searchContentActions.stopSearching());
     }
-  }, [searchContent.isSearching, possibleMatch]);
+  }, [searchContent.isSearching, possibleMatches]);
 
   return (
     <main className="main">
@@ -142,24 +112,33 @@ const Content = () => {
           <span className="blinking-cursor"></span>
         )}
       </div>
-      {searchContent.isResults && (
+      {searchContent.isResults && possibleMatches && (
         <div className="main__match-test">
           <div className="main__mt__matched-words">
             <h2>Possible Match</h2>
-            {possibleMatch ? <p>{possibleMatch}</p> : <p>Loading...</p>}
-            <h2>Other Matched Words</h2>
-            <p>Elepha</p>
-            <p>Elepha</p>
-            <p>Elepha</p>
-            <p>Elepha</p>
-            <p>Elepha</p>
-            <p>Elepha</p>
+            <div className="main__mt__mw__possible-match">
+              {possibleMatches &&
+                possibleMatches.map((matchedWord) => {
+                  return <p key={Math.random()}>{matchedWord}</p>;
+                })}
+            </div>
+            {!possibleMatches.length && isMatching && (
+              <p className="not-found">Not found</p>
+            )}
+            <h2>Words that contains</h2>
+            <div className="main__mt__mw__contain-words">
+              {wordsHasLetters &&
+                wordsHasLetters.map((word) => {
+                  return <p key={Math.random()}>{word}</p>;
+                })}
+            </div>
           </div>
-          <div className="main__mt__matching">
-            <img src={MatchingGif} />
-            <p>Matching...</p>
-          </div>
-          <p>Elephant</p>
+        </div>
+      )}
+      {searchContent.isSearching && !possibleMatches && (
+        <div className="main__mt__matching">
+          <img src={MatchingGif} />
+          <p>Matching...</p>
         </div>
       )}
     </main>

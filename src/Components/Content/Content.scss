@@ -1,17 +1,23 @@
 @-webkit-keyframes blink {
-  0% { background: transparent; }
-  50% { background: rgba($color: #000000, $alpha: .7); }
-  100% { background: transparent; }
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: rgba($color: #000000, $alpha: 0.7);
+  }
+  100% {
+    background: transparent;
+  }
 }
 
-.main{
+.main {
   display: flex;
   justify-content: center;
   align-items: center;
   user-select: none;
   flex-direction: column;
 
-  .main__scrambled{
+  .main__scrambled {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -30,49 +36,66 @@
       margin-top: 10px;
     }
 
-    h2{
+    h2 {
       color: rgba($color: #000000, $alpha: 0.5);
     }
 
-    p{
+    p {
       margin-top: 10px;
       font-size: 20pt;
-      color: rgba($color: #000000, $alpha: .7);
+      color: rgba($color: #000000, $alpha: 0.7);
     }
   }
 
-  .main__match-test{
+  .main__match-test {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 50px;
 
-    .main__mt__matched-words{
+    .main__mt__matched-words {
       text-align: center;
       border: 1px solid #c9c9c9;
+      width: 100%;
       padding: 10px;
       border-radius: 5px;
       margin: 10px;
       margin-right: 50px;
 
-      h2{
-        color: rgba($color: #000000, $alpha: .7);
+      .not-found {
+        color: red;
       }
 
-      p:nth-of-type(1){
+      h2 {
+        color: rgba($color: #000000, $alpha: 0.7);
+      }
+
+      .main__mt__mw__possible-match{
         margin-bottom: 20px;
+        p{
+          font-size: 16pt;
+        }
       }
 
-      p{
-        font-size: 16pt;
+      .main__mt__mw__contain-words{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        height: max-content;
+        gap: 10px;
+        border: 1px solid #c9c9c9;
+        padding: 10px;
+
+        p {
+          font-size: 16pt;
+        }        
       }
     }
 
-    .main__mt__matching{
+    .main__mt__matching {
       text-align: center;
     }
 
-    &>p{
+    & > p {
       font-size: 20pt;
       margin-left: 50px;
     }
