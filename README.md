@@ -2,7 +2,7 @@
 
 This is a app that scramble English words and show other words that contain the unscrambled letters.
 
-<img align=center src="./Public/preview.gif" />
+<img align=center src="./public/preview.gif" />
 
 ## Installation
 
